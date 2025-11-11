@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goal Prediction Game - Sports News</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+
+    .game-hero {
+      padding: 60px 0;
+      color: white;
+      text-align: center;
+    }
+
+    .game-hero h1 {
+      font-size: 3.5rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+      animation: fadeInDown 1s ease;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .game-container {
+      max-width: 900px;
+      margin: 0 auto 50px;
+      background: white;
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+    }
+
+    .match-display {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 40px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .teams {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin: 30px 0;
+    }
+
+    .team {
+      text-align: center;
+    }
+
+    .team-logo {
+      font-size: 5rem;
+      margin-bottom: 15px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .team-name {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .vs {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #764ba2;
+    }
+
+    .feedback {
+      padding: 30px;
+      border-radius: 15px;
+      margin: 30px 0;
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-align: center;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .feedback.neutral {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      color: #333;
+    }
+
+    .feedback.hot {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      color: white;
+      animation: glow 1s ease-in-out;
+    }
+
+    .feedback.cold {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      animation: glow 1s ease-in-out;
+    }
+
+    .feedback.win {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      animation: celebrate 0.5s ease;
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+      50% { box-shadow: 0 0 40px rgba(255,255,255,0.5); }
+    }
+
+    @keyframes celebrate {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.05) rotate(2deg); }
+      75% { transform: scale(1.05) rotate(-2deg); }
+    }
+
+    .guess-controls {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+    }
+
+    .guess-input {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.5rem;
+      border: 3px solid #e0e0e0;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .guess-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .game-btn {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-new {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .game-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .game-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .stats-panel {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .history-section {
+      background: #f5f7fa;
+      padding: 25px;
+      border-radius: 15px;
+      display: none;
+    }
+
+    .history-section h4 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .guess-badge {
+      display: inline-block;
+      padding: 8px 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 20px;
+      margin: 5px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .gallery-section {
+      margin-top: 40px;
+      padding: 30px;
+      background: white;
+      border-radius: 20px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .gallery-item {
+      cursor: pointer;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.05);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      color: white;
+      font-size: 3rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .accordion-section {
+      margin-top: 30px;
+    }
+
+    .accordion-header-custom {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .accordion-header-custom:hover {
+      transform: translateX(5px);
+    }
+
+    .accordion-arrow {
+      transition: transform 0.3s ease;
+    }
+
+    .accordion-arrow.rotated {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content-custom {
+      display: none;
+      background: #f5f7fa;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+    }
+
+    .bouncing-ball {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      animation: bounce 1s infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-30px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-hero">
+    <h1>⚽ Goal Prediction Game</h1>
+    <p style="font-size: 1.2rem; margin-top: 15px;">Guess how many goals were scored!</p>
+  </div>
+
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">🏆 Sports News</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="News.html">News</a></li>
+            <li class="nav-item"><a class="nav-link" href="schedule.html">Schedule</a></li>
+            <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+            <li class="nav-item"><a class="nav-link" href="todo.html">To-Do</a></li>
+            <li class="nav-item"><a class="nav-link" href="sorting.html">Sort</a></li>
+            <li class="nav-item"><a class="nav-link active" href="game.html">Game</a></li>
+            <li class="nav-item"><a class="nav-link" href="jquery-effects.html">jQuery</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="game-container">
+      <div class="match-display">
+        <h2 style="color: #667eea; margin-bottom: 30px;">⚽ Match Prediction</h2>
+        <div class="teams">
+          <div class="team">
+            <div class="team-logo" id="team1Logo">🔴</div>
+            <div class="team-name" id="team1Name">Loading...</div>
+          </div>
+          <div class="vs">VS</div>
+          <div class="team">
+            <div class="team-logo" id="team2Logo">🔵</div>
+            <div class="team-name" id="team2Name">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feedback neutral" id="feedbackMsg">
+        The match just finished! How many total goals were scored?
+      </div>
+
+      <div class="guess-controls">
+        <h4 style="text-align: center; color: #667eea; margin-bottom: 20px;">
+          Make Your Prediction (0-10 goals)
+        </h4>
+        <input 
+          type="number" 
+          class="guess-input" 
+          id="guessInput" 
+          min="0" 
+          max="10" 
+          placeholder="Enter number of goals"
+        >
+        <button class="game-btn btn-submit" id="submitGuessBtn">
+          🎯 Submit Guess
+        </button>
+        <button class="game-btn btn-new" id="newGameBtn">
+          🔄 New Match
+        </button>
+      </div>
+
+      <div class="history-section" id="historySection">
+        <h4>📊 Your Guesses:</h4>
+        <div id="guessHistory"></div>
+      </div>
+
+      <div class="stats-panel">
+        <h3 style="text-align: center; margin-bottom: 10px;">📈 Game Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-value" id="attemptsCount">0</span>
+            <span class="stat-label">Current Attempts</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-value" id="gamesPlayed">0</span>
+            <span class="stat-label">Games Played</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-value" id="bestScore">-</span>
+            <span class="stat-label">Best Score</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery-section">
+        <h3 style="text-align: center; color: #667eea; margin-bottom: 20px;">
+          🏟️ Stadium Gallery
+        </h3>
+        <button class="game-btn btn-submit" id="showGalleryBtn">
+          Show Gallery
+        </button>
+        <div class="gallery-grid">
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1459865264687-595d652de67e?w=400&h=300&fit=crop" alt="Stadium 1">
+          </div>
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop" alt="Stadium 2">
+          </div>
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop" alt="Stadium 3">
+          </div>
+          <div class="gallery-item">
+            <img src="https://images.unsplash.com/photo-1577223625816-7546f18cffca?w=400&h=300&fit=crop" alt="Stadium 4">
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-section">
+        <h3 style="text-align: center; color: #667eea; margin-bottom: 20px;">
+          📖 Game Rules
+        </h3>
+        <div class="accordion-header-custom">
+          <span>How to Play</span>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-content-custom">
+          <p>1. A random match appears between two teams</p>
+          <p>2. Guess the total number of goals scored (0-10)</p>
+          <p>3. Get feedback on how close you are</p>
+          <p>4. Try to guess correctly in the fewest attempts!</p>
+        </div>
+
+        <div class="accordion-header-custom">
+          <span>Scoring System</span>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-content-custom">
+          <p>🔥 HOT: You're within 1-2 goals</p>
+          <p>❄️ COLD: You're more than 2 goals away</p>
+          <p>🎉 PERFECT: You guessed exactly right!</p>
+          <p>Try to minimize your attempts for the best score!</p>
+        </div>
+
+        <div class="accordion-header-custom">
+          <span>Tips & Tricks</span>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-content-custom">
+          <p>💡 Most football matches have 2-4 goals total</p>
+          <p>💡 Pay attention to "hot" and "cold" feedback</p>
+          <p>💡 Don't guess the same number twice!</p>
+          <p>💡 Your guess history is shown below the input</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px; text-align: center;">
+        <h4 style="color: #667eea;">⚽ Bouncing Ball Animation</h4>
+        <div class="bouncing-ball" id="bouncingBall"></div>
+        <button class="game-btn btn-submit" id="stopBounceBtn" style="width: auto; display: inline-block; margin: 10px;">
+          Pause
+        </button>
+        <button class="game-btn btn-new" id="startBounceBtn" style="width: auto; display: inline-block; margin: 10px;">
+          Resume
+        </button>
+      </div>
+    </div>
+  </div>
+
+  
+  <div id="imageModal" class="modal">
+    <span class="close-modal" id="closeModal">&times;</span>
+    <img class="modal-content" id="modalImage">
+  </div>
+
+  <footer class="bg-dark text-white text-center py-3 mt-5">
+    <p>&copy; 2025 Sports News & Analysis</p>
+    <p class="text-muted">Team: Alym Baisal | SE-2437</p>
+  </footer>
+
+  <script>
+   
+    $(document).ready(function() {
+      const matches = [
+        { team1: 'Real Madrid', team2: 'Barcelona', logo1: '🔴', logo2: '🔵' },
+        { team1: 'Manchester City', team2: 'Liverpool', logo1: '🔵', logo2: '🔴' },
+        { team1: 'Bayern Munich', team2: 'Dortmund', logo1: '🔴', logo2: '🟡' },
+        { team1: 'PSG', team2: 'Marseille', logo1: '🔵', logo2: '⚪' }
+      ];
+
+      let targetGoals, attempts, guessHistory, gamesPlayed = 0, bestScore = null, gameWon;
+
+   
+      function initGame() {
+        targetGoals = Math.floor(Math.random() * 11); 
+        attempts = 0;
+        guessHistory = [];
+        gameWon = false;
+
+        const match = matches[Math.floor(Math.random() * matches.length)];
+  
+        $('#team1Name').text(match.team1);
+        $('#team2Name').text(match.team2);
+        $('#team1Logo').text(match.logo1);
+        $('#team2Logo').text(match.logo2);
+
+        $('#feedbackMsg').text('The match just finished! How many total goals were scored?')
+                        .removeClass('hot cold win').addClass('neutral');
+        $('#guessInput').val('').prop('disabled', false);
+        $('#submitGuessBtn').prop('disabled', false);
+        $('#historySection').hide();
+        updateStats();
+
+        console.log('🎮 New game started. Target:', targetGoals);
+      }
+
+      initGame();
+
+
+      $('#submitGuessBtn').click(function() {
+        if (gameWon) return;
+
+        const guess = parseInt($('#guessInput').val(), 10);
+
+        if (isNaN(guess) || guess < 0 || guess > 10) {
+          $('#feedbackMsg').text('⚠️ Please enter a valid number between 0 and 10!')
+                          .removeClass('hot cold win').addClass('neutral');
+          return;
+        }
+
+        if (guessHistory.includes(guess)) {
+          $('#feedbackMsg').text('🔄 You already guessed ' + guess + '! Try a different number.')
+                          .removeClass('hot cold win').addClass('neutral');
+          return;
+        }
+
+        attempts++;
+        guessHistory.push(guess);
+        updateGuessHistory();
+
+        const difference = Math.abs(targetGoals - guess);
+
+        if (guess === targetGoals) {
+
+          gameWon = true;
+          $('#feedbackMsg').html('🎉 Perfect Prediction!<br><div style="font-size: 3rem; margin: 15px 0;">' + 
+                                targetGoals + ' Goals</div>You guessed it in ' + attempts + ' attempts!')
+                          .removeClass('hot cold neutral').addClass('win');
+          $('#guessInput').prop('disabled', true);
+          $('#submitGuessBtn').prop('disabled', true);
+
+          gamesPlayed++;
+          if (bestScore === null || attempts < bestScore) {
+            bestScore = attempts;
+          }
+          updateStats();
+        } else if (guess < targetGoals) {
+          if (difference === 1) {
+            $('#feedbackMsg').text('🔥 So close! Just ONE more goal!')
+                            .removeClass('cold win neutral').addClass('hot');
+          } else if (difference <= 2) {
+            $('#feedbackMsg').text('📈 Getting warm! A bit more goals were scored!')
+                            .removeClass('cold win neutral').addClass('hot');
+          } else {
+            $('#feedbackMsg').text('❄️ Too low! It was a higher-scoring match!')
+                            .removeClass('hot win neutral').addClass('cold');
+          }
+        } else {
+          if (difference === 1) {
+            $('#feedbackMsg').text('🔥 Almost perfect! Just ONE goal less!')
+                            .removeClass('cold win neutral').addClass('hot');
+          } else if (difference <= 2) {
+            $('#feedbackMsg').text('📉 Close! Slightly fewer goals were scored!')
+                            .removeClass('cold win neutral').addClass('hot');
+          } else {
+            $('#feedbackMsg').text('❄️ Too high! The match was more defensive!')
+                            .removeClass('hot win neutral').addClass('cold');
+          }
+        }
+
+        updateStats();
+        $('#guessInput').val('').focus();
+      });
+
+      function updateGuessHistory() {
+        if (guessHistory.length > 0) {
+          $('#historySection').slideDown();
+          $('#guessHistory').html(
+            guessHistory.map(g => '<span class="guess-badge">' + g + ' ⚽</span>').join('')
+          );
+        } else {
+          $('#historySection').slideUp();
+        }
+      }
+
+      function updateStats() {
+        $('#attemptsCount').text(attempts);
+        $('#gamesPlayed').text(gamesPlayed || 0);
+        $('#bestScore').text(bestScore !== null ? bestScore : '-');
+      }
+
+      $('#newGameBtn').click(function() {
+        if (confirm('Start a new match prediction?')) {
+          initGame();
+        }
+      });
+
+      $('#guessInput').keypress(function(e) {
+        if (e.which === 13) {
+          $('#submitGuessBtn').click();
+        }
+      });
+
+      $('.gallery-item').hide();
+
+      $('#showGalleryBtn').click(function() {
+        $('.gallery-item').each(function(i) {
+          $(this).delay(150 * i).fadeIn(300);
+        });
+        $(this).fadeOut(300);
+      });
+
+      $(document).on('click', '.gallery-item img', function() {
+        const imgSrc = $(this).attr('src');
+        $('#modalImage').attr('src', imgSrc);
+        $('#imageModal').fadeIn(200).css('display', 'flex');
+      });
+
+      $('#closeModal').click(function() {
+        $('#imageModal').fadeOut(200);
+      });
+
+      $('#imageModal').click(function(e) {
+        if (e.target.id === 'imageModal') {
+          $(this).fadeOut(200);
+        }
+      });
+
+      $('.accordion-header-custom').click(function() {
+        const content = $(this).next('.accordion-content-custom');
+        const arrow = $(this).find('.accordion-arrow');
+
+        $('.accordion-content-custom').not(content).slideUp(200);
+        $('.accordion-arrow').not(arrow).removeClass('rotated');
+
+        content.slideToggle(200);
+        arrow.toggleClass('rotated');
+      });
+
+      const ball = $('#bouncingBall');
+      let bouncing = true;
+      
+      $('#stopBounceBtn').click(function() {
+        if (bouncing) {
+          ball.css('animation-play-state', 'paused');
+          bouncing = false;
+          console.log('⏸️ Animation paused');
+        }
+      });
+      
+      $('#startBounceBtn').click(function() {
+        if (!bouncing) {
+          ball.css('animation-play-state', 'running');
+          bouncing = true;
+          console.log('▶️ Animation resumed');
+        }
+      });
+
+      console.log('✅ Game initialized successfully');
+    });
+  </script>
+</body>
+</html>

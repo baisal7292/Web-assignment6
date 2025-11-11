@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Schedule - Sports News</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      transition: background 1s ease;
+    }
+    
+    .schedule-hero {
+      padding: 70px 0;
+      color: white;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .schedule-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1920&h=400&fit=crop') center/cover;
+      opacity: 0.2;
+      animation: zoomEffect 20s infinite alternate;
+    }
+    
+    @keyframes zoomEffect {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+    
+    .schedule-hero h1 {
+      position: relative;
+      z-index: 1;
+      font-size: 3.5rem;
+      font-weight: bold;
+      text-shadow: 3px 3px 15px rgba(0,0,0,0.5);
+    }
+    
+    .datetime-display {
+      background: white;
+      color: #333;
+      padding: 25px;
+      border-radius: 20px;
+      margin: 30px auto;
+      max-width: 700px;
+      text-align: center;
+      font-size: 1.4rem;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      font-weight: 700;
+    }
+    
+    .theme-controls {
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .theme-btn {
+      padding: 18px 50px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.3rem;
+      box-shadow: 0 8px 20px rgba(245, 87, 108, 0.5);
+      transition: all 0.3s ease;
+    }
+    
+    .theme-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(245, 87, 108, 0.7);
+    }
+    
+    .schedule-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background: white;
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+    }
+    
+    .schedule-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    
+    .schedule-header h2 {
+      color: #667eea;
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    .filter-section {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 15px 30px;
+      border: 3px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .add-match-section {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+    }
+
+    .match-input-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .match-input {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1.1rem;
+    }
+
+    .match-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .add-match-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .add-match-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .schedule-table {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
+    }
+    
+    .schedule-table table {
+      width: 100%;
+      margin: 0;
+    }
+    
+    .schedule-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .schedule-table thead th {
+      padding: 20px;
+      font-size: 1.2rem;
+      border: none;
+    }
+    
+    .schedule-table tbody tr {
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .schedule-table tbody tr:hover {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      transform: scale(1.01);
+    }
+    
+    .schedule-table tbody td {
+      padding: 20px;
+      font-size: 1.1rem;
+    }
+    
+    .team-name {
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .venue-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .sport-badge {
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .badge-football { background: #28a745; color: white; }
+    .badge-basketball { background: #ff6b35; color: white; }
+    .badge-tennis { background: #ffd93d; color: #333; }
+    .badge-hockey { background: #00b4d8; color: white; }
+
+    .match-details {
+      display: none;
+      padding: 20px;
+      background: #f8f9fa;
+      border-top: 3px solid #667eea;
+    }
+
+    .details-content {
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .detail-item {
+      text-align: center;
+      padding: 15px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 10px;
+    }
+
+    .detail-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .delete-match-btn {
+      padding: 8px 15px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .delete-match-btn:hover {
+      background: #c82333;
+      transform: scale(1.05);
+    }
+
+    .animation-section {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+    }
+
+    .bouncing-ball {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      margin: 30px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      animation: bounce 1.5s infinite;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-40px); }
+    }
+
+    .animation-controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .control-btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-btn.pause {
+      background: #ffc107;
+      color: #333;
+    }
+
+    .control-btn.resume {
+      background: #28a745;
+      color: white;
+    }
+
+    .control-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .stats-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      border-radius: 20px;
+      margin-top: 40px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.1);
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-box:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.05);
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="schedule-hero">
+    <h1>📅 Upcoming Matches Schedule</h1>
+  </div>
+
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">🏆 Sports News</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="News.html">News</a></li>
+            <li class="nav-item"><a class="nav-link active" href="schedule.html">Schedule</a></li>
+            <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+            <li class="nav-item"><a class="nav-link" href="todo.html">To-Do</a></li>
+            <li class="nav-item"><a class="nav-link" href="sorting.html">Sort</a></li>
+            <li class="nav-item"><a class="nav-link" href="game.html">Game</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="datetime-display" id="currentDateTime">
+      📅 Loading...
+    </div>
+    
+    <div class="theme-controls">
+      <button class="theme-btn" id="changeThemeBtn">🎨 Change Background Theme</button>
+    </div>
+
+    <div class="schedule-container">
+      <div class="schedule-header">
+        <h2>⚽ Match Schedule Manager</h2>
+        <p style="font-size: 1.2rem; color: #6c757d;">View, filter, and manage upcoming sports matches</p>
+      </div>
+
+      <div class="filter-section">
+        <h4 style="color: #667eea; margin-bottom: 20px; text-align: center;">🔍 Filter by Sport</h4>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-sport="all">📋 All Sports</button>
+          <button class="filter-btn" data-sport="Football">⚽ Football</button>
+          <button class="filter-btn" data-sport="Basketball">🏀 Basketball</button>
+          <button class="filter-btn" data-sport="Tennis">🎾 Tennis</button>
+          <button class="filter-btn" data-sport="Hockey">🏒 Hockey</button>
+        </div>
+      </div>
+
+      <div class="add-match-section">
+        <h4 style="color: #333; margin-bottom: 20px; text-align: center;">➕ Add New Match</h4>
+        <div class="match-input-group">
+          <input type="text" class="match-input" id="team1Input" placeholder="Team 1">
+          <input type="text" class="match-input" id="team2Input" placeholder="Team 2">
+          <input type="date" class="match-input" id="dateInput">
+          <input type="time" class="match-input" id="timeInput">
+          <select class="match-input" id="sportSelect">
+            <option value="">Select Sport</option>
+            <option value="Football">⚽ Football</option>
+            <option value="Basketball">🏀 Basketball</option>
+            <option value="Tennis">🎾 Tennis</option>
+            <option value="Hockey">🏒 Hockey</option>
+          </select>
+          <input type="text" class="match-input" id="venueInput" placeholder="Venue">
+        </div>
+        <button class="add-match-btn" id="addMatchBtn">➕ Add Match to Schedule</button>
+      </div>
+
+      <div class="schedule-table">
+        <table class="table" id="scheduleTable">
+          <thead>
+            <tr>
+              <th>Sport</th>
+              <th>Team A</th>
+              <th>Team B</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Venue</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="animation-section">
+        <h3 style="color: #333; margin-bottom: 20px;">⚽ Match Ball Animation</h3>
+        <div class="bouncing-ball" id="bouncingBall">⚽</div>
+        <div class="animation-controls">
+          <button class="control-btn pause" id="pauseBtn">⏸️ Pause Animation</button>
+          <button class="control-btn resume" id="resumeBtn">▶️ Resume Animation</button>
+        </div>
+      </div>
+
+      <div class="stats-section">
+        <h3 style="text-align: center; margin-bottom: 10px;">📊 Schedule Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-number" id="totalMatches">0</span>
+            <span class="stat-label">Total Matches</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" id="footballCount">0</span>
+            <span class="stat-label">⚽ Football</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" id="basketballCount">0</span>
+            <span class="stat-label">🏀 Basketball</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" id="tennisCount">0</span>
+            <span class="stat-label">🎾 Tennis</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white text-center py-3 mt-5">
+    <p>&copy; 2025 Sports News & Analysis</p>
+    <p class="text-muted">Team: Alym Baisal | SE-2437</p>
+  </footer>
+
+  <script>
+    $(document).ready(function() {
+      let matches = [
+        { id: 1, sport: 'Football', team1: 'Real Madrid', team2: 'Arsenal', date: 'Sept 30, 2025', time: '19:00', venue: 'Emirates Stadium', tickets: '45,000', price: '$85' },
+        { id: 2, sport: 'Football', team1: 'Barcelona', team2: 'Bayern Munich', date: 'Oct 5, 2025', time: '21:00', venue: 'Allianz Arena', tickets: '50,000', price: '$95' },
+        { id: 3, sport: 'Basketball', team1: 'Lakers', team2: 'Warriors', date: 'Oct 10, 2025', time: '20:00', venue: 'Staples Center', tickets: '18,000', price: '$120' },
+        { id: 4, sport: 'Tennis', team1: 'Djokovic', team2: 'Nadal', date: 'Oct 15, 2025', time: '14:00', venue: 'Wimbledon', tickets: '15,000', price: '$200' }
+      ];
+
+      let currentFilter = 'all';
+      let nextId = 5;
+
+      function updateDateTime() {
+        const now = new Date();
+        $('#currentDateTime').html('📅 ' + now.toLocaleString('en-US', { 
+          year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        }));
+      }
+      
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+
+      const themes = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
+      ];
+      
+      let currentTheme = parseInt(localStorage.getItem('scheduleTheme')) || 0;
+      if (localStorage.getItem('scheduleThemeBg')) {
+        $('body').css('background', localStorage.getItem('scheduleThemeBg'));
+      }
+
+      $('#changeThemeBtn').click(function() {
+        currentTheme = (currentTheme + 1) % themes.length;
+        const selectedTheme = themes[currentTheme];
+        $('body').css({ 'background': selectedTheme, 'transition': 'background 1s ease' });
+        localStorage.setItem('scheduleTheme', currentTheme);
+        localStorage.setItem('scheduleThemeBg', selectedTheme);
+        $(this).text('🎨 Theme ' + (currentTheme + 1) + '/' + themes.length + ' (Saved!)');
+      });
+
+      function getSportBadgeClass(sport) {
+        switch(sport) {
+          case 'Football': return 'badge-football';
+          case 'Basketball': return 'badge-basketball';
+          case 'Tennis': return 'badge-tennis';
+          case 'Hockey': return 'badge-hockey';
+          default: return 'badge-football';
+        }
+      }
+
+      function renderMatches() {
+        const $tbody = $('#scheduleTableBody');
+        $tbody.html('');
+
+        let filteredMatches = currentFilter === 'all' ? matches : matches.filter(m => m.sport === currentFilter);
+
+        filteredMatches.forEach((match, index) => {
+          const badgeClass = getSportBadgeClass(match.sport);
+          const $row = $('<tr>', { 'data-match-id': match.id }).html(`
+            <td><span class="sport-badge ${badgeClass}">${match.sport}</span></td>
+            <td class="team-name">${match.team1}</td>
+            <td class="team-name">${match.team2}</td>
+            <td>${match.date}</td>
+            <td>${match.time}</td>
+            <td><span class="venue-badge">${match.venue}</span></td>
+            <td><button class="delete-match-btn" data-id="${match.id}">🗑️ Delete</button></td>
+          `);
+
+          $row.click(function(e) {
+            if (!$(e.target).hasClass('delete-match-btn')) {
+              $(`tr[data-details-id="${match.id}"]`).slideToggle(400);
+            }
+          });
+
+          const $detailsRow = $('<tr>', { class: 'match-details', 'data-details-id': match.id }).html(`
+            <td colspan="7">
+              <div class="details-content">
+                <h4 style="color: #667eea; margin-bottom: 15px;">📋 Match Details</h4>
+                <div class="details-grid">
+                  <div class="detail-item">
+                    <div class="detail-label">🎟️ Available Tickets</div>
+                    <div class="detail-value">${match.tickets || 'N/A'}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">💰 Ticket Price</div>
+                    <div class="detail-value">${match.price || 'N/A'}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">🏟️ Stadium</div>
+                    <div class="detail-value">${match.venue}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">⏰ Match Time</div>
+                    <div class="detail-value">${match.time}</div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          `);
+
+          $tbody.append($row, $detailsRow);
+          $row.hide().delay(index * 100).fadeIn(500);
+        });
+
+        updateStatistics();
+      }
+
+      function updateStatistics() {
+        animateValue('#totalMatches', 0, matches.length, 500);
+        animateValue('#footballCount', 0, matches.filter(m => m.sport === 'Football').length, 500);
+        animateValue('#basketballCount', 0, matches.filter(m => m.sport === 'Basketball').length, 500);
+        animateValue('#tennisCount', 0, matches.filter(m => m.sport === 'Tennis').length, 500);
+      }
+
+      function animateValue(selector, start, end, duration) {
+        const $elem = $(selector);
+        const range = end - start;
+        const increment = end > start ? 1 : -1;
+        const stepTime = Math.abs(Math.floor(duration / (range || 1)));
+        let current = start;
+        const timer = setInterval(function() {
+          current += increment;
+          $elem.text(current);
+          if (current == end) clearInterval(timer);
+        }, stepTime);
+      }
+
+      $('.filter-btn').click(function() {
+        $('.filter-btn').removeClass('active');
+        $(this).addClass('active');
+        currentFilter = $(this).data('sport');
+        renderMatches();
+      });
+
+      $('#addMatchBtn').click(function() {
+        const team1 = $('#team1Input').val().trim();
+        const team2 = $('#team2Input').val().trim();
+        const date = $('#dateInput').val();
+        const time = $('#timeInput').val();
+        const sport = $('#sportSelect').val();
+        const venue = $('#venueInput').val().trim();
+
+        if (!team1 || !team2 || !date || !time || !sport || !venue) {
+          alert('⚠️ Please fill in all fields!');
+          return;
+        }
+
+        matches.push({
+          id: nextId++, sport, team1, team2,
+          date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          time, venue, tickets: 'TBD', price: 'TBD'
+        });
+
+        $('#team1Input, #team2Input, #venueInput, #dateInput, #timeInput').val('');
+        $('#sportSelect').val('');
+        renderMatches();
+
+        const $success = $('<div>').text('✅ Match added successfully!').css({
+          position: 'fixed', top: '100px', right: '20px', background: '#28a745', color: 'white',
+          padding: '20px 30px', borderRadius: '15px', fontWeight: 'bold', zIndex: 9999,
+          boxShadow: '0 5px 20px rgba(0,0,0,0.3)'
+        });
+        $('body').append($success);
+        $success.hide().fadeIn(300).delay(2000).fadeOut(300, function() { $(this).remove(); });
+      });
+
+      $(document).on('click', '.delete-match-btn', function(e) {
+        e.stopPropagation();
+        const matchId = parseInt($(this).data('id'));
+        if (confirm('Are you sure you want to delete this match?')) {
+          matches = matches.filter(m => m.id !== matchId);
+          $(this).closest('tr').fadeOut(300, function() {
+            $(this).next('.match-details').remove();
+            $(this).remove();
+            renderMatches();
+          });
+        }
+      });
+
+      $('#pauseBtn').click(() => $('#bouncingBall').css('animation-play-state', 'paused'));
+      $('#resumeBtn').click(() => $('#bouncingBall').css('animation-play-state', 'running'));
+
+      renderMatches();
+      $('.schedule-container').hide().fadeIn(1000);
+      console.log('✅ Schedule page initialized');
+    });
+  </script>
+</body>
+</html>

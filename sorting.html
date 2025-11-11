@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Stats Ranking - Sports News</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+    
+    .sorting-hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 70px 0;
+      color: white;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .sorting-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1920&h=400&fit=crop') center/cover;
+      opacity: 0.15;
+    }
+    
+    .sorting-hero h1 {
+      position: relative;
+      z-index: 1;
+      font-size: 3.5rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+      animation: slideInDown 0.8s ease;
+    }
+    
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .sorting-container {
+      max-width: 1100px;
+      margin: -40px auto 50px;
+      background: white;
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.2);
+    }
+    
+    .container-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .container-header h2 {
+      color: #667eea;
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+    
+    .container-header p {
+      color: #6c757d;
+      font-size: 1.2rem;
+    }
+    
+    .input-section {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 35px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .stat-type-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-btn {
+      padding: 18px 25px;
+      border: 3px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    
+    .stat-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .stat-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.05);
+    }
+    
+    .input-group-custom {
+      margin-top: 25px;
+    }
+    
+    .form-label {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #333;
+      margin-bottom: 12px;
+      display: block;
+    }
+    
+    .number-input {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.2rem;
+      border: 3px solid #e0e0e0;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .number-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .number-input.error {
+      border-color: #dc3545;
+      animation: shake 0.5s;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .example-text {
+      color: #6c757d;
+      font-size: 1rem;
+      margin-top: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+    }
+    
+    .error-message {
+      color: #dc3545;
+      padding: 15px;
+      background: #f8d7da;
+      border-radius: 10px;
+      margin: 15px 0;
+      display: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+    
+    .error-message.show {
+      display: block;
+      animation: slideIn 0.4s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 40px;
+      margin: 25px 0;
+      justify-content: center;
+    }
+    
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 15px 30px;
+      background: white;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+    
+    .radio-option:hover {
+      background: #f0f0f0;
+      transform: scale(1.05);
+    }
+    
+    .radio-option input[type="radio"] {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+    
+    .sort-btn {
+      width: 100%;
+      padding: 22px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+    
+    .sort-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+    }
+    
+    .result-section {
+      margin-top: 40px;
+      padding: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      color: white;
+      display: none;
+      animation: fadeIn 0.6s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .result-section.show {
+      display: block;
+    }
+    
+    .result-title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .trophy {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .players-table {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      color: #333;
+    }
+    
+    .player-row {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 12px;
+      border-left: 6px solid #667eea;
+      animation: slideInRight 0.5s ease;
+      transition: all 0.3s ease;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .player-row:hover {
+      transform: translateX(10px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .player-rank {
+      font-size: 2rem;
+      font-weight: bold;
+      width: 80px;
+      color: #667eea;
+      text-align: center;
+    }
+    
+    .player-stat {
+      flex: 1;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .player-icon {
+      font-size: 2.5rem;
+      margin-left: 15px;
+    }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 3px solid rgba(255,255,255,0.3);
+    }
+    
+    .stat-box {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .stat-box:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.05);
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    .stat-label {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="sorting-hero">
+    <h1>🏆 Player Stats Ranking</h1>
+  </div>
+
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">🏆 Sports News</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="News.html">News</a></li>
+            <li class="nav-item"><a class="nav-link" href="schedule.html">Schedule</a></li>
+            <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+            <li class="nav-item"><a class="nav-link" href="todo.html">To-Do</a></li>
+            <li class="nav-item"><a class="nav-link active" href="sorting.html">Rankings</a></li>
+            <li class="nav-item"><a class="nav-link" href="game.html">Game</a></li>
+            <li class="nav-item"><a class="nav-link" href="jquery-effects.html">jQuery</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="sorting-container">
+      <div class="container-header">
+        <h2>📊 Sort Player Statistics</h2>
+        <p>Enter player stats and see them ranked!</p>
+      </div>
+      
+      <div class="input-section">
+        <label class="form-label">Select Statistic Type:</label>
+        <div class="stat-type-selector" id="statTypeSelector">
+          <button class="stat-btn active" data-type="goals">⚽ Goals</button>
+          <button class="stat-btn" data-type="assists">🎯 Assists</button>
+          <button class="stat-btn" data-type="saves">🧤 Saves</button>
+          <button class="stat-btn" data-type="points">📊 Points</button>
+          <button class="stat-btn" data-type="minutes">⏱️ Minutes</button>
+        </div>
+        
+        <div class="input-group-custom">
+          <label class="form-label">Enter Stats (separated by commas):</label>
+          <input 
+            type="text" 
+            class="number-input" 
+            id="numberInput" 
+            placeholder="e.g., 23, 18, 31, 15, 27, 42, 8"
+          >
+          <div class="example-text" id="exampleText">
+            💡 Example: 23, 18, 31, 15, 27 (Player goal counts)
+          </div>
+        </div>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="sortOrder" value="descending" checked>
+            <span>🏆 Best to Worst</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="sortOrder" value="ascending">
+            <span>📉 Worst to Best</span>
+          </label>
+        </div>
+        
+        <button class="sort-btn" id="sortBtn">🔢 Rank Players</button>
+      </div>
+      
+      <div class="result-section" id="resultSection">
+        <div class="result-title" id="resultTitle">
+          <div class="trophy">🏆</div>
+          Player Rankings
+        </div>
+        <div class="players-table" id="playersDisplay"></div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-value" id="countStat">0</span>
+            <span class="stat-label">Total Players</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-value" id="maxStat">0</span>
+            <span class="stat-label">Highest</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-value" id="minStat">0</span>
+            <span class="stat-label">Lowest</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-value" id="avgStat">0</span>
+            <span class="stat-label">Average</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white text-center py-3 mt-5">
+    <p>&copy; 2025 Sports News & Analysis</p>
+    <p class="text-muted">Team: Alym Baisal | SE-2437</p>
+  </footer>
+
+  <script>
+    $(document).ready(function() {
+      let currentStatType = 'goals';
+      
+      const statConfig = {
+        goals: { icon: '⚽', label: 'Goals', example: '23, 18, 31, 15, 27' },
+        assists: { icon: '🎯', label: 'Assists', example: '12, 8, 15, 6, 10' },
+        saves: { icon: '🧤', label: 'Saves', example: '145, 120, 98, 167, 130' },
+        points: { icon: '📊', label: 'Points', example: '89, 76, 92, 81, 88' },
+        minutes: { icon: '⏱️', label: 'Minutes Played', example: '2700, 3000, 2400, 3200, 2900' }
+      };
+      
+      $('.stat-btn').click(function() {
+        $('.stat-btn').removeClass('active');
+        $(this).addClass('active');
+        currentStatType = $(this).data('type');
+        
+        $('#exampleText').fadeOut(200, function() {
+          $(this).html('💡 Example: ' + statConfig[currentStatType].example + 
+                      ' (Player ' + statConfig[currentStatType].label.toLowerCase() + ')');
+        }).fadeIn(200);
+      });
+      
+      $('#sortBtn').click(function() {
+        const $input = $('#numberInput');
+        const $errorMessage = $('#errorMessage');
+        const $resultSection = $('#resultSection');
+        
+        const inputValue = $input.val().trim();
+
+        if (inputValue === '') {
+          showError('❌ Please enter some statistics!');
+          $input.addClass('error');
+          $resultSection.removeClass('show').hide();
+          return;
+        }
+        
+        const parts = inputValue.split(',');
+        const numbers = [];
+        const invalidInputs = [];
+        
+        $.each(parts, function(index, part) {
+          const trimmed = part.trim();
+          const num = parseFloat(trimmed);
+          
+          if (trimmed !== '' && !isNaN(num) && num >= 0) {
+            numbers.push(num);
+          } else if (trimmed !== '') {
+            invalidInputs.push(trimmed);
+          }
+        });
+        
+        if (numbers.length === 0) {
+          showError('❌ No valid statistics found! Please enter numbers separated by commas.');
+          $input.addClass('error');
+          $resultSection.removeClass('show').hide();
+          return;
+        }
+        
+        if (invalidInputs.length > 0) {
+          showError('⚠️ Warning: Ignored invalid inputs: ' + invalidInputs.join(', ') + 
+                   '. Ranking valid stats only.');
+        } else {
+          hideError();
+        }
+        
+        $input.removeClass('error');
+        
+        const sortOrder = $('input[name="sortOrder"]:checked').val();
+
+        let sortedNumbers;
+        if (sortOrder === 'descending') {
+          sortedNumbers = numbers.sort((a, b) => b - a);
+          $('#resultTitle').html('<div class="trophy">🏆</div>' +
+            statConfig[currentStatType].label + ' Rankings: Best to Worst');
+        } else {
+          sortedNumbers = numbers.sort((a, b) => a - b);
+          $('#resultTitle').html('<div class="trophy">📉</div>' +
+            statConfig[currentStatType].label + ' Rankings: Worst to Best');
+        }
+        
+        const medals = ['🥇', '🥈', '🥉'];
+        const $playersDisplay = $('#playersDisplay');
+        
+        $playersDisplay.html('');
+        
+        $.each(sortedNumbers, function(index, stat) {
+          const rank = index + 1;
+          const medal = sortOrder === 'descending' && index < 3 ? medals[index] : '';
+          
+          const $row = $('<div>', {
+            class: 'player-row',
+            html: '<div class="player-rank">#' + rank + '</div>' +
+                  '<div class="player-stat">' + stat + ' ' + statConfig[currentStatType].icon + '</div>' +
+                  '<div class="player-icon">' + medal + '</div>'
+          });
+          
+          $playersDisplay.append($row);
+          $row.hide().delay(index * 100).slideDown(400);
+        });
+        
+        const count = sortedNumbers.length;
+        const min = Math.min.apply(null, sortedNumbers);
+        const max = Math.max.apply(null, sortedNumbers);
+        const sum = sortedNumbers.reduce((acc, num) => acc + num, 0);
+        const avg = (sum / count).toFixed(1);
+        
+        animateValue('#countStat', 0, count, 800);
+        animateValue('#minStat', 0, min, 800);
+        animateValue('#maxStat', 0, max, 800);
+        $('#avgStat').text(avg);
+        
+        $resultSection.addClass('show').hide().fadeIn(600);
+        
+        $('html, body').animate({
+          scrollTop: $resultSection.offset().top - 100
+        }, 800);
+      });
+      
+      function showError(message) {
+        $('#errorMessage').text(message).addClass('show');
+      }
+      
+      function hideError() {
+        $('#errorMessage').removeClass('show');
+      }
+      
+      function animateValue(selector, start, end, duration) {
+        const $elem = $(selector);
+        const range = end - start;
+        const increment = end > start ? 1 : -1;
+        const stepTime = Math.abs(Math.floor(duration / range));
+        let current = start;
+        
+        const timer = setInterval(function() {
+          current += increment;
+          $elem.text(current);
+          if (current == end) {
+            clearInterval(timer);
+          }
+        }, stepTime);
+      }
+      
+      $('#numberInput').on('input', function() {
+        $(this).removeClass('error');
+        hideError();
+      });
+
+      $('#numberInput').keypress(function(e) {
+        if (e.which === 13) {
+          $('#sortBtn').click();
+        }
+      });
+      
+      $('.sorting-container').hide().fadeIn(1000);
+    });
+  </script>
+</body>
+</html>
